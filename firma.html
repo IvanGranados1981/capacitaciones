@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Firma de Capacitación | Albano Cozzuol</title>
+    <meta name="description" content="Sistema digital de firma de documentos de capacitación operativa">
+    <style>
+        /* ======================== */
+        /* Reset & Variables        */
+        /* ======================== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --primary-light: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.15);
+            --accent: #059669;
+            --accent-hover: #047857;
+            --accent-glow: rgba(5, 150, 105, 0.2);
+            --bg: #f0f4f8;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-focus: #3b82f6;
+            --error: #ef4444;
+            --error-bg: #fef2f2;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 24px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ======================== */
+        /* Layout                   */
+        /* ======================== */
+        .app {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ======================== */
+        /* Header                   */
+        /* ======================== */
+        .header {
+            background: #ffffff;
+            padding: 20px 20px 28px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: var(--bg);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .header__logo {
+            max-width: 200px;
+            height: auto;
+            margin: 0 auto 10px;
+            display: block;
+        }
+
+        .header__title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            letter-spacing: 0.5px;
+        }
+
+        /* ======================== */
+        /* Main Content             */
+        /* ======================== */
+        .content {
+            flex: 1;
+            padding: 8px 16px 24px;
+        }
+
+        /* ======================== */
+        /* Document Badge           */
+        /* ======================== */
+        .doc-badge {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .doc-badge__label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .doc-badge__name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            word-break: break-word;
+        }
+
+        /* ======================== */
+        /* Form Card                */
+        /* ======================== */
+        .form-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            box-shadow: var(--shadow-md);
+            animation: slideUp 0.5s ease-out 0.1s both;
+        }
+
+        /* ======================== */
+        /* Form Fields              */
+        /* ======================== */
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field__label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            letter-spacing: 0.2px;
+        }
+
+        .field__input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-size: 16px;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--surface);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .field__input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .field__input.error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+        }
+
+        .field__error {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: 4px;
+            display: none;
+            animation: shake 0.3s ease-out;
+        }
+
+        .field__error.visible {
+            display: block;
+        }
+
+        /* ======================== */
+        /* Signature Canvas         */
+        /* ======================== */
+        .signature-section {
+            margin-bottom: 18px;
+        }
+
+        .signature-section__label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .signature-section__label-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.2px;
+        }
+
+        .signature-section__clear {
+            font-size: 12px;
+            color: var(--error);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, background 0.2s;
+        }
+
+        .signature-section__clear.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .signature-section__clear:hover {
+            background: var(--error-bg);
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: #fafbfd;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            touch-action: none;
+        }
+
+        .canvas-wrapper.active {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            border-style: solid;
+        }
+
+        .canvas-wrapper.error {
+            border-color: var(--error);
+        }
+
+        .canvas-wrapper__placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            color: var(--text-muted);
+        }
+
+        .canvas-wrapper__placeholder.hidden {
+            opacity: 0;
+        }
+
+        .canvas-wrapper__placeholder-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .canvas-wrapper__placeholder-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        #signatureCanvas {
+            display: block;
+            width: 100%;
+            height: 180px;
+            cursor: crosshair;
+        }
+
+        .signature-line {
+            position: absolute;
+            bottom: 40px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: var(--border);
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .signature-error {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: 4px;
+            display: none;
+            animation: shake 0.3s ease-out;
+        }
+
+        .signature-error.visible {
+            display: block;
+        }
+
+        /* ======================== */
+        /* Timestamp                */
+        /* ======================== */
+        .timestamp {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            padding: 8px;
+            background: var(--bg);
+            border-radius: var(--radius-xs);
+        }
+
+        .timestamp__icon { margin-right: 4px; }
+
+        /* ======================== */
+        /* Checkbox                 */
+        /* ======================== */
+        .confirm-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .confirm-check__input {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            margin-top: 1px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .confirm-check__text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            user-select: none;
+        }
+
+        .confirm-check__error {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: -12px;
+            margin-bottom: 16px;
+            margin-left: 32px;
+            display: none;
+            animation: shake 0.3s ease-out;
+        }
+
+        .confirm-check__error.visible {
+            display: block;
+        }
+
+        /* ======================== */
+        /* Submit Button            */
+        /* ======================== */
+        .submit-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--accent) 0%, #0d9488 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 17px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 14px var(--accent-glow);
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn__loading {
+            display: none;
+        }
+
+        .submit-btn.loading .submit-btn__text { visibility: hidden; }
+        .submit-btn.loading .submit-btn__loading {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* ======================== */
+        /* Success Screen           */
+        /* ======================== */
+        .success-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            min-height: 60vh;
+        }
+
+        .success-screen.visible {
+            display: flex;
+        }
+
+        .success-icon-wrapper {
+            width: 90px;
+            height: 90px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .success-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--success-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .success-check {
+            font-size: 40px;
+            color: var(--success);
+            animation: checkPop 0.3s ease-out 0.3s both;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            animation: fadeInUp 0.4s ease-out 0.4s both;
+        }
+
+        .success-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+            animation: fadeInUp 0.4s ease-out 0.5s both;
+        }
+
+        .success-details {
+            width: 100%;
+            max-width: 340px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            text-align: left;
+            animation: fadeInUp 0.4s ease-out 0.6s both;
+        }
+
+        .success-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .success-detail-row:last-child { border-bottom: none; }
+
+        .success-detail-row__label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .success-detail-row__value {
+            color: var(--text);
+            font-weight: 600;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-word;
+        }
+
+        .success-signature-preview {
+            width: 100%;
+            margin-top: 16px;
+            animation: fadeInUp 0.4s ease-out 0.7s both;
+        }
+
+        .success-signature-preview__label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .success-signature-preview img {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            background: white;
+        }
+
+        .success-actions {
+            margin-top: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 340px;
+            animation: fadeInUp 0.4s ease-out 0.8s both;
+        }
+
+        .btn-next {
+            padding: 14px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .btn-next:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-next:active { transform: scale(0.98); }
+
+        .btn-close {
+            padding: 12px 24px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-close:hover { background: var(--bg); }
+
+        /* ======================== */
+        /* Error Screen             */
+        /* ======================== */
+        .error-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            min-height: 50vh;
+        }
+
+        .error-screen.visible { display: flex; }
+
+        .error-screen__icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .error-screen__title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .error-screen__text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            max-width: 320px;
+            line-height: 1.5;
+        }
+
+        /* ======================== */
+        /* Animations               */
+        /* ======================== */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        @keyframes checkPop {
+            from { opacity: 0; transform: scale(0.3); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-4px); }
+            40% { transform: translateX(4px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ======================== */
+        /* Responsive               */
+        /* ======================== */
+        @media (min-width: 481px) {
+            body { background: #e2e8f0; }
+            .app { min-height: 100vh; }
+            .content { padding: 12px 24px 32px; }
+        }
+
+        @media (max-height: 640px) {
+            .header { padding: 12px 16px 18px; }
+            .header__logo { max-width: 160px; margin-bottom: 6px; }
+            .header__title { font-size: 15px; }
+            #signatureCanvas { height: 140px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- ===== HEADER ===== -->
+        <header class="header">
+            <img class="header__logo" src="logo.png" alt="Albano Cozzuol">
+            <h1 class="header__title">Firma de Capacitación</h1>
+        </header>
+
+        <!-- ===== FORM SECTION ===== -->
+        <main class="content" id="formSection">
+            <!-- Document Badge -->
+            <div class="doc-badge">
+                <div class="doc-badge__label">📄 Documento</div>
+                <div class="doc-badge__name" id="docName">—</div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="form-card">
+                <!-- Nombre -->
+                <div class="field">
+                    <label class="field__label" for="inputNombre">Nombre completo</label>
+                    <input class="field__input" type="text" id="inputNombre"
+                           placeholder="Ej: Juan Pérez" autocomplete="name">
+                    <div class="field__error" id="errorNombre">Ingresá tu nombre completo</div>
+                </div>
+
+                <!-- Legajo -->
+                <div class="field">
+                    <label class="field__label" for="inputLegajo">Legajo</label>
+                    <input class="field__input" type="tel" id="inputLegajo"
+                           placeholder="Ej: 1234" inputmode="numeric" pattern="[0-9]*">
+                    <div class="field__error" id="errorLegajo">Ingresá tu número de legajo</div>
+                </div>
+
+                <!-- Signature -->
+                <div class="signature-section">
+                    <div class="signature-section__label">
+                        <span class="signature-section__label-text">Tu firma</span>
+                        <button class="signature-section__clear" id="btnClear" type="button">✕ Borrar</button>
+                    </div>
+                    <div class="canvas-wrapper" id="canvasWrapper">
+                        <canvas id="signatureCanvas"></canvas>
+                        <div class="signature-line"></div>
+                        <div class="canvas-wrapper__placeholder" id="canvasPlaceholder">
+                            <span class="canvas-wrapper__placeholder-icon">👆</span>
+                            <span class="canvas-wrapper__placeholder-text">Firmá aquí con el dedo</span>
+                        </div>
+                    </div>
+                    <div class="signature-error" id="errorSignature">Dibujá tu firma en el recuadro</div>
+                </div>
+
+                <!-- Timestamp -->
+                <div class="timestamp">
+                    <span class="timestamp__icon">🕐</span>
+                    <span id="currentDateTime">—</span>
+                </div>
+
+                <!-- Confirm Checkbox -->
+                <label class="confirm-check">
+                    <input class="confirm-check__input" type="checkbox" id="checkConfirm">
+                    <span class="confirm-check__text">
+                        Confirmo que recibí y comprendí la capacitación sobre el documento indicado.
+                    </span>
+                </label>
+                <div class="confirm-check__error" id="errorConfirm">Debés confirmar para continuar</div>
+
+                <!-- Submit Button -->
+                <button class="submit-btn" id="btnSubmit" type="button">
+                    <span class="submit-btn__text">✍️ FIRMAR</span>
+                    <div class="submit-btn__loading"><div class="spinner"></div></div>
+                </button>
+            </div>
+        </main>
+
+        <!-- ===== SUCCESS SCREEN ===== -->
+        <div class="success-screen" id="successScreen">
+            <div class="success-icon-wrapper">
+                <div class="success-circle">
+                    <span class="success-check">✓</span>
+                </div>
+            </div>
+            <h2 class="success-title">¡Firma registrada!</h2>
+            <p class="success-subtitle">Tu firma fue guardada exitosamente.</p>
+
+            <div class="success-details">
+                <div class="success-detail-row">
+                    <span class="success-detail-row__label">Documento</span>
+                    <span class="success-detail-row__value" id="successDoc">—</span>
+                </div>
+                <div class="success-detail-row">
+                    <span class="success-detail-row__label">Nombre</span>
+                    <span class="success-detail-row__value" id="successName">—</span>
+                </div>
+                <div class="success-detail-row">
+                    <span class="success-detail-row__label">Legajo</span>
+                    <span class="success-detail-row__value" id="successLegajo">—</span>
+                </div>
+                <div class="success-detail-row">
+                    <span class="success-detail-row__label">Fecha y hora</span>
+                    <span class="success-detail-row__value" id="successDate">—</span>
+                </div>
+            </div>
+
+            <div class="success-signature-preview">
+                <div class="success-signature-preview__label">Tu firma</div>
+                <img id="successSignatureImg" src="" alt="Firma">
+            </div>
+
+            <div class="success-actions">
+                <button class="btn-next" id="btnNext">👤 Siguiente operario</button>
+                <button class="btn-close" id="btnClose">Cerrar ventana</button>
+            </div>
+        </div>
+
+        <!-- ===== ERROR SCREEN (no document) ===== -->
+        <div class="error-screen" id="errorScreen">
+            <div class="error-screen__icon">⚠️</div>
+            <h2 class="error-screen__title">Documento no especificado</h2>
+            <p class="error-screen__text">
+                Esta página debe abrirse escaneando el código QR del documento de capacitación.
+                Pedile el QR a tu supervisor.
+            </p>
+        </div>
+    </div>
+
+    <script>
+    // =============================================================
+    // CONFIGURACIÓN — Modificar estos valores al implementar
+    // =============================================================
+    const CONFIG = {
+        // ---- Power Automate HTTP Trigger (Premium) ----
+        // Si tenés Power Automate Premium, pegá acá la URL del HTTP trigger.
+        // Si está vacío, se usa el modo Forms (redirect).
+        submitUrl: '',
+
+        // ---- Microsoft Forms ----
+        formsUrlTemplate: 'https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=M6Hfcw-ww0CefznGUu9Ps8oEkfUEmL5Kl-5cQSrY0L5UNElEOUhXRzQyOUQ5UEUwRk9KNlA5REpJSy4u&rdbc986e107a649d8b68c491a33080fbd={DOC}&rf3c3a43921944dd983156c160f40bfdf={NOMBRE}&r69304175b475402a84da2ae02aa5295f={LEGAJO}&refe1036bd08e49ac9c85cb5f04bfdead={FIRMA}',
+
+        // ---- General ----
+        // Si es true, requiere el parámetro ?doc= en la URL. Si es false, permite escribir el nombre manualmente.
+        requireDocParam: false
+    };
+
+    // =============================================================
+    // ESTADO DE LA APLICACIÓN
+    // =============================================================
+    let documentName = '';
+    let signatureDataUrl = '';
+    let signaturePathData = '';
+
+    // =============================================================
+    // INICIALIZACIÓN
+    // =============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        initDocument();
+        initClock();
+        initSignaturePad();
+        initFormEvents();
+    });
+
+    // =============================================================
+    // LECTURA DEL DOCUMENTO DESDE URL
+    // =============================================================
+    function initDocument() {
+        const params = new URLSearchParams(window.location.search);
+        documentName = params.get('doc') || '';
+
+        if (documentName) {
+            documentName = decodeURIComponent(documentName);
+        }
+
+        if (!documentName && CONFIG.requireDocParam) {
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('errorScreen').classList.add('visible');
+            return;
+        }
+
+        if (!documentName) {
+            documentName = 'Documento de prueba';
+        }
+
+        document.getElementById('docName').textContent = documentName;
+    }
+
+    // =============================================================
+    // RELOJ EN TIEMPO REAL
+    // =============================================================
+    function initClock() {
+        function updateTime() {
+            const now = new Date();
+            const options = {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent =
+                now.toLocaleDateString('es-AR', options);
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    }
+
+    // =============================================================
+    // SIGNATURE PAD
+    // =============================================================
+    function initSignaturePad() {
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('canvasWrapper');
+        const placeholder = document.getElementById('canvasPlaceholder');
+        const clearBtn = document.getElementById('btnClear');
+
+        let drawing = false;
+        let strokes = [];
+        let currentStroke = [];
+        let lastPoint = null;
+        let lastTime = 0;
+        let lastWidth = 2.5;
+
+        // Setup canvas for retina
+        function setupCanvas() {
+            const rect = wrapper.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            canvas.style.width = rect.width + 'px';
+            ctx.scale(dpr, dpr);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#1e3a8a';
+            redraw();
+        }
+
+        // Get point from event
+        function getPoint(e) {
+            const rect = canvas.getBoundingClientRect();
+            const source = e.touches ? e.touches[0] : e;
+            return {
+                x: source.clientX - rect.left,
+                y: source.clientY - rect.top,
+                time: Date.now()
+            };
+        }
+
+        // Calculate velocity-based width
+        function getStrokeWidth(p1, p2) {
+            if (!p1 || !p2) return 2.5;
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dt = Math.max(1, p2.time - p1.time);
+            const speed = Math.sqrt(dx * dx + dy * dy) / dt;
+            const targetWidth = Math.max(1.2, 3.5 - speed * 1.8);
+            return lastWidth + (targetWidth - lastWidth) * 0.4;
+        }
+
+        // Draw a segment
+        function drawSegment(p1, p2, width) {
+            ctx.beginPath();
+            ctx.lineWidth = width;
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+        }
+
+        // Redraw all strokes (after resize)
+        function redraw() {
+            const rect = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            for (const stroke of strokes) {
+                if (stroke.length < 2) continue;
+                let w = 2.5;
+                for (let i = 1; i < stroke.length; i++) {
+                    const dx = stroke[i].x - stroke[i-1].x;
+                    const dy = stroke[i].y - stroke[i-1].y;
+                    const dt = Math.max(1, stroke[i].time - stroke[i-1].time);
+                    const speed = Math.sqrt(dx*dx + dy*dy) / dt;
+                    w = Math.max(1.2, 3.5 - speed * 1.8);
+                    drawSegment(stroke[i-1], stroke[i], w);
+                }
+            }
+        }
+
+        // Start stroke
+        function startStroke(e) {
+            e.preventDefault();
+            drawing = true;
+            wrapper.classList.add('active');
+            placeholder.classList.add('hidden');
+            clearBtn.classList.add('visible');
+            hideError('errorSignature');
+
+            const point = getPoint(e);
+            currentStroke = [point];
+            lastPoint = point;
+            lastTime = point.time;
+            lastWidth = 2.5;
+
+            ctx.beginPath();
+            ctx.fillStyle = '#1e3a8a';
+            ctx.arc(point.x, point.y, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Continue stroke
+        function continueStroke(e) {
+            if (!drawing) return;
+            e.preventDefault();
+
+            const point = getPoint(e);
+            const width = getStrokeWidth(lastPoint, point);
+            lastWidth = width;
+
+            drawSegment(lastPoint, point, width);
+
+            currentStroke.push(point);
+            lastPoint = point;
+        }
+
+        // End stroke
+        function endStroke(e) {
+            if (!drawing) return;
+            e.preventDefault();
+            drawing = false;
+            wrapper.classList.remove('active');
+
+            if (currentStroke.length > 0) {
+                strokes.push([...currentStroke]);
+            }
+            currentStroke = [];
+            lastPoint = null;
+        }
+
+        // Clear
+        clearBtn.addEventListener('click', () => {
+            const rect = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            strokes = [];
+            currentStroke = [];
+            placeholder.classList.remove('hidden');
+            clearBtn.classList.remove('visible');
+        });
+
+        // Event listeners
+        canvas.addEventListener('mousedown', startStroke);
+        canvas.addEventListener('mousemove', continueStroke);
+        canvas.addEventListener('mouseup', endStroke);
+        canvas.addEventListener('mouseleave', endStroke);
+
+        canvas.addEventListener('touchstart', startStroke, { passive: false });
+        canvas.addEventListener('touchmove', continueStroke, { passive: false });
+        canvas.addEventListener('touchend', endStroke, { passive: false });
+        canvas.addEventListener('touchcancel', endStroke, { passive: false });
+
+        // Resize handler
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(setupCanvas, 150);
+        });
+
+        // Initial setup
+        setupCanvas();
+
+        // Expose methods
+        window.signaturePad = {
+            isEmpty: () => strokes.length === 0,
+            toDataURL: () => canvas.toDataURL('image/png'),
+            toPathData: () => {
+                return strokes.map(stroke =>
+                    stroke.map(p => `${Math.round(p.x)},${Math.round(p.y)}`).join('|')
+                ).join(';');
+            },
+            clear: () => clearBtn.click()
+        };
+    }
+
+    // =============================================================
+    // FORMULARIO — EVENTOS Y VALIDACIÓN
+    // =============================================================
+    function initFormEvents() {
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnNext = document.getElementById('btnNext');
+        const btnClose = document.getElementById('btnClose');
+
+        document.getElementById('inputNombre').addEventListener('input', () => hideError('errorNombre'));
+        document.getElementById('inputLegajo').addEventListener('input', () => hideError('errorLegajo'));
+        document.getElementById('checkConfirm').addEventListener('change', () => hideError('errorConfirm'));
+
+        btnSubmit.addEventListener('click', handleSubmit);
+        btnNext.addEventListener('click', resetForm);
+
+        btnClose.addEventListener('click', () => {
+            window.close();
+            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#64748b;text-align:center;padding:20px;"><div><p style="font-size:40px;margin-bottom:16px;">✅</p><p style="font-size:18px;font-weight:600;">Podés cerrar esta pestaña</p></div></div>';
+        });
+    }
+
+    // =============================================================
+    // SUBMIT HANDLER
+    // =============================================================
+    async function handleSubmit() {
+        const nombre = document.getElementById('inputNombre').value.trim();
+        const legajo = document.getElementById('inputLegajo').value.trim();
+        const confirmed = document.getElementById('checkConfirm').checked;
+        const signatureEmpty = window.signaturePad.isEmpty();
+
+        let valid = true;
+
+        if (!nombre || nombre.length < 2) {
+            showError('errorNombre', 'inputNombre');
+            valid = false;
+        }
+
+        if (!legajo || !/^\d+$/.test(legajo)) {
+            showError('errorLegajo', 'inputLegajo');
+            valid = false;
+        }
+
+        if (signatureEmpty) {
+            showError('errorSignature');
+            document.getElementById('canvasWrapper').classList.add('error');
+            setTimeout(() => document.getElementById('canvasWrapper').classList.remove('error'), 2000);
+            valid = false;
+        }
+
+        if (!confirmed) {
+            showError('errorConfirm');
+            valid = false;
+        }
+
+        if (!valid) return;
+
+        const btn = document.getElementById('btnSubmit');
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        signatureDataUrl = window.signaturePad.toDataURL();
+        signaturePathData = window.signaturePad.toPathData();
+
+        const now = new Date();
+        const submissionData = {
+            documento: documentName,
+            nombre: nombre,
+            legajo: legajo,
+            fechaHora: now.toISOString(),
+            fechaLocal: now.toLocaleDateString('es-AR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            }),
+            firmaPathData: signaturePathData,
+            firmaImagen: signatureDataUrl
+        };
+
+        console.log('📋 Datos de firma capturados:', submissionData);
+
+        try {
+            // === OPCIÓN 1: Power Automate HTTP Trigger (Premium) ===
+            if (CONFIG.submitUrl) {
+                const response = await fetch(CONFIG.submitUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submissionData)
+                });
+
+                if (!response.ok) throw new Error('Error en el servidor');
+                showSuccess(submissionData);
+                return;
+            }
+
+            // === OPCIÓN 2: Microsoft Forms Redirect ===
+            if (CONFIG.formsUrlTemplate) {
+                const formsUrl = CONFIG.formsUrlTemplate
+                    .replace('{DOC}', encodeURIComponent(documentName))
+                    .replace('{NOMBRE}', encodeURIComponent(nombre))
+                    .replace('{LEGAJO}', encodeURIComponent(legajo))
+                    .replace('{FIRMA}', encodeURIComponent(signaturePathData));
+
+                showSuccess(submissionData);
+
+                setTimeout(() => {
+                    window.open(formsUrl, '_blank');
+                }, 1500);
+                return;
+            }
+
+            // === MODO DEMO (sin backend configurado) ===
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            showSuccess(submissionData);
+
+        } catch (error) {
+            console.error('Error al enviar:', error);
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            alert('Error al registrar la firma. Intentá de nuevo.');
+        }
+    }
+
+    // =============================================================
+    // SUCCESS
+    // =============================================================
+    function showSuccess(data) {
+        document.getElementById('formSection').style.display = 'none';
+        const screen = document.getElementById('successScreen');
+        screen.classList.add('visible');
+
+        document.getElementById('successDoc').textContent = data.documento;
+        document.getElementById('successName').textContent = data.nombre;
+        document.getElementById('successLegajo').textContent = data.legajo;
+        document.getElementById('successDate').textContent = data.fechaLocal;
+        document.getElementById('successSignatureImg').src = signatureDataUrl;
+
+        if (navigator.vibrate) navigator.vibrate(100);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // =============================================================
+    // RESET FORM (siguiente operario)
+    // =============================================================
+    function resetForm() {
+        document.getElementById('successScreen').classList.remove('visible');
+        document.getElementById('formSection').style.display = 'block';
+
+        document.getElementById('inputNombre').value = '';
+        document.getElementById('inputLegajo').value = '';
+        document.getElementById('checkConfirm').checked = false;
+
+        const btn = document.getElementById('btnSubmit');
+        btn.classList.remove('loading');
+        btn.disabled = false;
+
+        window.signaturePad.clear();
+
+        setTimeout(() => document.getElementById('inputNombre').focus(), 300);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // =============================================================
+    // ERROR HELPERS
+    // =============================================================
+    function showError(errorId, inputId) {
+        document.getElementById(errorId).classList.add('visible');
+        if (inputId) document.getElementById(inputId).classList.add('error');
+    }
+
+    function hideError(errorId) {
+        const el = document.getElementById(errorId);
+        if (el) el.classList.remove('visible');
+
+        const inputMap = {
+            'errorNombre': 'inputNombre',
+            'errorLegajo': 'inputLegajo'
+        };
+        if (inputMap[errorId]) {
+            document.getElementById(inputMap[errorId]).classList.remove('error');
+        }
+    }
+    </script>
+</body>
+</html>
